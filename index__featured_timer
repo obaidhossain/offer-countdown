@@ -1,0 +1,435 @@
+{% comment %}
+** Single featured collection - dynamic **
+- Draggable section
+{% endcomment %}
+
+{% comment %} Assign object as block or section {% endcomment %}
+{% if type == 'block' %}
+  {%- assign object = block -%}
+{% else %}
+  {%- assign object = section -%}
+{% endif %}
+
+{% comment %} Content settings {% endcomment %}
+{%- assign title = object.settings.title -%}
+{%- assign subtitle = object.settings.subtitle -%}
+{%- assign collection = collections[object.settings.collection] -%}
+{% comment %} End content settings {% endcomment %}
+
+{% comment %} Assign product length to be selected limit for onboarding {% endcomment %}
+{% if collection != blank and collection.products != blank %}
+  {%- assign section_onboarding = false -%}
+{% else %}
+  {%- assign section_onboarding = true -%}
+{% endif %}
+
+{% comment %} Check to see if enough products available to create slide {% endcomment %}
+{% if object.settings.collection_style == 'slider' %}
+  {% if object.settings.products_limit > object.settings.products_per and collection.all_products_count > object.settings.products_per %}
+    {%- assign layout = 'slider' -%}
+  {% else %}
+    {%- assign layout = 'grid' -%}
+  {% endif %}
+{% else %}
+  {%- assign layout = 'grid' -%}
+{% endif %}
+
+{% comment %} Section specific CSS {% endcomment %}
+{% style %}
+  #shopify-section-{{ object.id }} {
+    padding-top: {{ object.settings.padding_top }}px;
+    padding-bottom: {{ object.settings.padding_bottom }}px;
+    {% if object.settings.width == 'wide' %}
+      width: 100%;
+    {% endif %}
+  }
+  {% render 'css-loop',
+          css: object.settings.custom_css,
+          id: object.id
+  %}
+{% endstyle %}
+
+{% comment %} HTML markup {% endcomment %}
+<section class="section
+                featured__timer
+                {{ object.settings.css_class }}
+                is-width-{{ object.settings.width }}
+                {% if show_gutter == false %}
+                  has-no-side-gutter
+                  has-background
+                {% else %}
+                  has-gutter-enabled
+                {% endif %}
+                "
+                {% if object.settings.animation != "none" %}
+                  data-scroll-class="{{ object.settings.animation }}"
+                {% endif %}>
+  {% if title != blank %}
+    <div class="container">
+      {% render 'heading',
+              title: title,
+              heading_tag: 'h2',
+      		  subtitle: subtitle,
+      		  subheading_tag: 'p',
+              context: 'featured-timer-heading',
+              text_alignment: 'left',
+      		  layout: 'one-half',
+      		  divider: 'hide',
+              url: collection.url
+      %}
+      {% render 'timer',
+              timer: '180',
+              timertext: 'Time Left',
+              context: 'featured-timer-time',
+              text_alignment: 'right',
+      		  layout: 'one-half',
+      		  divider: 'hide'
+      %}
+    </div>
+  {% endif %}
+  <div class="container has-column-padding-bottom featured-collection layout--{{ layout }} is-justify-center">
+    {% if section_onboarding == false %}
+      {% comment %} Loop through products {% endcomment %}
+      {% if layout == 'slider' %}
+        {% if collection.all_products_count > 0 %}
+          {% render 'product-slider',
+                  limit: object.settings.products_limit,
+                  products: collection.products,
+                  skip_product: product,
+                  per_slide: object.settings.products_per,
+                  mobile_products_per_row: object.settings.mobile_products_per_row,
+                  align_height: object.settings.align_height,
+                  height: object.settings.height,
+                  show_gutter: object.settings.show_gutter,
+                  featured_collection: object.settings.collection
+          %}
+        {% endif %}
+      {% else %}
+        {% if collection.all_products_count > 0 %}
+          {% render 'product-loop',
+                  limit: object.settings.products_limit,
+                  products: collection.products,
+                  skip_product: product,
+                  products_per_row: object.settings.products_per,
+                  mobile_products_per_row: object.settings.mobile_products_per_row,
+                  align_height: object.settings.align_height,
+                  height: object.settings.collection_height
+          %}
+        {% endif %}
+      {% endif %}
+    {% else %}
+      {% comment %} Placeholder images {% endcomment %}
+      {% for i in (1..10) %}
+        <div class="collection__item
+          	one-fifth
+            {% if object.settings.mobile_products_per_row == '1' %}
+              small-down--one-whole
+            {% else %}
+              small-down--one-half
+            {% endif %}
+            thumbnail column">
+          {% capture num %}{% cycle "1", "2", "3", "4", "5", "6" %}{% endcapture %}
+          {{ 'product-' | append: num | placeholder_svg_tag: 'placeholder-svg placeholder-svg--product' }}
+        </div>
+      {% endfor %}
+    {% endif %}
+  </div>
+  {% if section.settings.btn_text != blank %}
+  <a href="{{ collection.url }}" class="button button--secondary button__{{ section.id }}">{{ section.settings.btn_text }}</a>
+  {% endif %}
+</section>
+
+{% comment %} JavaScript {% endcomment %}
+<script
+  type="application/json"
+  data-section-id="{{ object.id }}"
+  data-section-data
+>
+  {
+    "collection_style": {{ layout | json }},
+    "products_per": {{ object.settings.products_per | json}},
+    "products_available": {{ collection.all_products_count | json }},
+    "products_limit": {{ object.settings.products_limit | json }},
+    "align_height": {{ object.settings.align_height | json }}
+  }
+</script>
+<script data-theme-editor-load-script src="{{ 'z__jsFeaturedCollection.js' | asset_url }}"></script>
+<style>
+  {% if section.settings.background != blank %}
+  #shopify-section-{{ section.id }} {
+    background-image:url({{ section.settings.background | img_url: 'master' }});
+    background-size: cover;
+    z-index: 9;
+    position:relative;
+  }
+  #shopify-section-1611644258c65eafeb * {
+    color: #fff;
+  }
+  #shopify-section-1611644258c65eafeb:after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: -9;
+    background: rgb(0 0 0 / 50%);
+  }
+  {% endif %}
+  {% if section.settings.btn_text != blank %}
+  .button__{{ section.id }} {
+    color: {{ section.settings.btn_color }} !important;
+    background: {{ section.settings.btn_bg_color }} !important;
+    border: {{ section.settings.btn_bg_color }} 2px solid !important;
+    border-radius:30px !important;
+  }
+  .button__{{ section.id }}:hover {
+    background: {{ section.settings.btn_color }} !important;
+    color: {{ section.settings.btn_bg_color }} !important;
+    border: {{ section.settings.btn_color }} 2px solid;
+  }
+  {% endif %}
+  .featured__timer .featured-collection__title {
+    font-size:24px;
+  }
+  @media screen and (max-width:798px) {
+    .featured__timer .one-half {
+      width:100%;
+    }
+    .featured__timer .is-align-end,
+    .featured__timer .is-align-right {
+      -webkit-align-items: flex-start;
+      -moz-align-items: flex-start;
+      -ms-align-items: flex-start;
+      align-items: flex-start;
+    }
+    .featured__timer .text-align-right,
+    .featured__timer .text-align-end {
+      text-align:left;
+    }
+    .heading-wrapper--featured-timer-heading {
+      margin-bottom:0;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Featured Timer",
+  "class": "featured-collection-section jsFeaturedCollection",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "background",
+      "label": "Background"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Up to 50% Off Deals"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Sub Heading",
+      "default": "Start the new year off right with the perfect drip! 💦"
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Collection"
+    },
+    {
+      "type": "header",
+      "content": "Product"
+    },
+    {
+      "type": "range",
+      "id": "products_per",
+      "label": "Products per row",
+      "min": 2,
+      "max": 7,
+      "default": 5
+    },
+    {
+      "type": "select",
+      "id": "mobile_products_per_row",
+      "label": "Products per row on mobile",
+      "info": "Applied only when 'Collection layout' is set to 'Grid'.",
+      "options": [
+        {
+          "value": "1",
+          "label": "1"
+        },
+        {
+          "value": "2",
+          "label": "2"
+        }
+      ],
+      "default": "1"
+    },
+    {
+      "type": "range",
+      "id": "products_limit",
+      "label": "Limit products",
+      "min": 3,
+      "max": 50,
+      "default": 10
+    },
+    {
+      "type": "checkbox",
+      "id": "align_height",
+      "label": "Align to height"
+    },
+    {
+      "type": "range",
+      "id": "collection_height",
+      "label": "Product image height",
+      "min": 150,
+      "max": 400,
+      "step": 10,
+      "default": 200,
+      "unit": "px",
+      "info": "Applied when 'Align to height' is enabled. [Learn more](https://help.outofthesandbox.com/hc/en-us/articles/360022543913)"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "radio",
+      "id": "collection_style",
+      "label": "Collection layout",
+      "default": "grid",
+      "options": [
+        {
+          "value": "slider",
+          "label": "Slider"
+        },
+        {
+          "value": "grid",
+          "label": "Grid"
+        }
+      ],
+      "default": "grid"
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Width",
+      "default": "wide",
+      "options": [
+        {
+          "value": "standard",
+          "label": "Standard"
+        },
+        {
+          "value": "wide",
+          "label": "Wide"
+        }
+      ]
+    },
+    {
+      "type": "checkbox",
+      "id": "show_gutter",
+      "label": "Show gutter",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top spacing",
+      "min": 0,
+      "max": 80,
+      "default": 20,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom spacing",
+      "min": 0,
+      "max": 80,
+      "default": 20,
+      "unit": "px"
+    },
+    {
+      "type": "select",
+      "id": "animation",
+      "label": "Animation",
+      "default": "none",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "fadeIn",
+          "label": "Fade in"
+        },
+        {
+          "value": "fadeInDown",
+          "label": "Fade in down"
+        },
+        {
+          "value": "fadeInLeft",
+          "label": "Fade in left"
+        },
+        {
+          "value": "fadeInRight",
+          "label": "Fade in right"
+        },
+        {
+          "value": "slideInLeft",
+          "label": "Slide in left"
+        },
+        {
+          "value": "slideInRight",
+          "label": "Slide in right"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Advanced",
+      "info": "[Learn more](https://help.outofthesandbox.com/hc/en-us/articles/360022329373)"
+    },
+    {
+      "type": "text",
+      "id": "css_class",
+      "label": "CSS Class"
+    },
+    {
+      "type": "textarea",
+      "id": "custom_css",
+      "label": "Custom CSS"
+    },
+    {
+      "type": "text",
+      "id": "btn_text",
+      "label": "Button Text",
+	  "default": "Shop Now"
+    },
+    {
+      "type": "color",
+      "id": "btn_color",
+      "label": "Button Color",
+	  "default": "#000"
+    },
+    {
+      "type": "color",
+      "id": "btn_bg_color",
+      "label": "Button Background",
+	  "default": "#ffee92"
+    }
+  ],
+  "presets": [{
+    "name": "Featured Timer",
+    "category": "Collection",
+    "settings": {
+
+    }
+  }]
+}
+{% endschema %}
