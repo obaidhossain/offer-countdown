@@ -1,0 +1,208 @@
+{% if text_alignment == blank %}
+  {% assign text_alignment = center %}
+{% endif %}
+
+<div class="heading-wrapper--{{ context }}
+            heading-wrapper
+            heading-wrapper--{{ settings.heading_divider_style }}
+            {{ layout | default: 'one-whole' }} column
+            is-flex
+            is-flex-column
+            is-align-{{ text_alignment }}
+            text-align-{{ text_alignment }}">
+  <div class="{{ context }}__title title">
+
+    <div id="timer">
+      <span id="timerUpFront"></span>
+    </div>
+    <p class="featured-timer-heading__subtitle subtitle">{{ timertext }}</p>
+    
+    <script>
+      function timer()
+
+      {
+        var currentTime = new Date()
+        var hours = currentTime.getHours()
+        var minutes = currentTime.getMinutes()
+        var seconds = currentTime.getSeconds()
+
+        if (minutes < 10)
+        {
+          minutes = "0" + minutes
+        }
+
+        if (hours < 6)
+        {
+          //var hoursLeft = 5 - hours;
+          var hoursLeft = 2;
+          var minsLeft = 60 - minutes;
+
+          if(minsLeft==60)
+          {
+            minsLeft=0;
+            hoursLeft++;
+          }
+          var secsLeft = 60 - seconds;
+
+          if(secsLeft==60)
+          {
+            secsLeft=0;
+            minsLeft++;
+          }
+        }
+
+        else if (hours < 18)
+        {
+          //var hoursLeft = 17 - hours;
+          var hoursLeft = 2;
+          var minsLeft = 60 - minutes;
+
+          if(minsLeft==60)
+          {
+            minsLeft=0;
+            hoursLeft++;
+          }
+
+          var secsLeft = 60 - seconds;
+
+          if(secsLeft==60)
+          {
+            secsLeft=0;
+            minsLeft++;
+          }
+        }
+
+        else if (hours < 24)
+        {
+          //var hoursLeft = 29 - hours;
+          var hoursLeft = 2;
+          var minsLeft = 60 - minutes;
+
+          if(minsLeft==60)
+          {
+            minsLeft=0;
+            hoursLeft++;
+          }
+
+          var secsLeft = 60 - seconds;
+
+          if(secsLeft==60)
+          {
+            secsLeft=0;
+            minsLeft++;
+          }
+        }
+
+        //else if (hours == 6)
+        //{
+          //var xmlhttp = new XMLHttpRequest();
+          //xmlhttp.open("reset.html", true);
+          //xmlhttp.send();
+        //}
+
+        //else if (hours == 18)
+        //{
+          //var xmlhttp = new XMLHttpRequest();
+          //xmlhttp.open("reset.html", true);
+          //xmlhttp.send();
+        //}
+
+        else
+        {
+          document.write("Oh No!");
+        }
+
+        //document.getElementById('timerUpFront').innerHTML= hoursLeft + ":" + minsLeft + ":" + secsLeft;
+        document.getElementById('timerUpFront').innerHTML= ('0' + hoursLeft).substr(-2) + ":" + ('0' + minsLeft).substr(-2) + ":" + ('0' + secsLeft).substr(-2);
+      }
+
+      var countdownTimer = setInterval('timer()', 1000);
+      
+      //moment().format();
+
+      /*    function timer(time,update,complete) {
+      var start = new Date().getTime();
+      var interval = setInterval(function() {
+        var now = time-(new Date().getTime()-start);
+        if( now <= 0) {
+          clearInterval(interval);
+          complete();
+        }
+        else update(Math.floor(now/1000));
+      },100); // the smaller this number, the more accurate the timer will be
+    }
+    timer(
+      1800000, // milliseconds
+      function(timeleft) { // called every step to update the visible countdown
+        document.getElementById('timer').innerHTML = timeleft+" second(s)";
+      },
+      function() { // what to do after
+        alert("Timer complete!");
+      }
+    );
+*/
+/*      $('.product_timer').each(function() { 
+        var $this = $(this);
+
+        var countdown = setInterval(function() { 
+
+          var start = new Date();
+          var now = new Date();
+          //var weekday = now.getDay();
+          //var difference = 30; 	// mention the date difference. 
+
+          //var days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+          //var minutes = ["30","60","90","120","150","180","210"];
+          //var deliverydate = minutes[start.getMinutes() + 15 ];
+          //var delivery = moment().add(difference, 'minutes').format('MMMM DD');
+
+          start.setHours(5, 30, 0);
+
+
+
+          //if (now > start) { // too late, go to tomorrow
+          //start.setDate(start.getMinutes() + 15);
+          //deliverydate = minutes[now.getMinutes() + 30 ];
+          //} 
+
+
+
+          //var Today = start.getDate();
+          //var Month = start.getMonth();
+
+
+          var remain = ((start - now) / 1000);  
+          var hh = Math.floor((remain / 60 / 60) % 60); 
+          var mm = Math.floor((remain / 60) % 60);
+          var ss = Math.floor(remain % 60);
+
+
+          var timertext = '<strong>' + hh + ':' + mm + ':' + ss + '</strong>';
+
+
+          //console.log(jQuery(".timer")) ;
+          jQuery($this).find(".timer").html(''+ timertext +'');
+
+        }, 1000); 
+
+      });*/
+    </script>
+    
+    <style>
+      #timer span {
+        color: #ffee92 !important;
+        font-size: xxx-large;
+        font-weight:700;
+      }
+    </style>
+  </div>
+
+  {% if divider == true %}
+    <div class="heading-divider
+                heading-divider--{{ settings.heading_divider_style }}"
+          {% if settings.heading_divider_animation != "none" %}
+            data-scroll-class="{{ settings.heading_divider_animation }}"
+          {% endif %}>
+    </div>
+  {% endif %}
+</div>
